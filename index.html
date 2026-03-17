@@ -619,11 +619,14 @@ const UTENTI = {
   'michele@rra-studio.it':       { nome: 'Michele',        ruolo: 'collaboratore' },
 };
 </script>
-<!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, getDocs, onSnapshot, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<!-- Firebase SDK compat (funziona su tutti gli hosting) -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script>
+  // Firebase compat API (no import/export needed)
+  const { initializeApp } = firebase;
+  const firebaseApp = firebase.initializeApp({
 
   const firebaseConfig = {
     apiKey: "AIzaSyDGzidJVickCNrzEzhTllZ84mj2E8sd7eo",
@@ -634,9 +637,9 @@ const UTENTI = {
     appId: "1:198123708590:web:32c6b1e9b0ee913b418d3f"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+  });
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
   // ── RUOLI ──────────────────────────────────────────────────────
   // Raffaele = admin (vede tutto)
@@ -706,11 +709,11 @@ const UTENTI = {
     try {
       const preventivi = JSON.parse(localStorage.getItem('rra_studio_prev') || '[]');
       for (const p of preventivi) {
-        await setDoc(doc(db, 'preventivi', p.id), {...p, _updatedBy: window._fbUser.email, _updatedAt: serverTimestamp()});
+        await setDoc(doc(db, 'preventivi', p.id), {...p, _updatedBy: window._fbUser.email, _updatedAt: firebase.firestore.FieldValue.serverTimestamp()});
       }
       const pratiche = JSON.parse(localStorage.getItem('rra_studio_pratiche') || '[]');
       for (const p of pratiche) {
-        await setDoc(doc(db, 'pratiche', p.id), {...p, _updatedBy: window._fbUser.email, _updatedAt: serverTimestamp()});
+        await setDoc(doc(db, 'pratiche', p.id), {...p, _updatedBy: window._fbUser.email, _updatedAt: firebase.firestore.FieldValue.serverTimestamp()});
       }
       console.log('Sync Firestore completata');
     } catch(e) {
